@@ -139,3 +139,6 @@ C:\Users\k1300378\Dropbox\Public\Koulu\Windows-ohjelmointi\Harjoitusty-4\Product
 C:\Users\k1300378\Dropbox\Public\Koulu\Windows-ohjelmointi\Harjoitusty-4\ProductService\obj\Debug\ProductService.csprojResolveAssemblyReference.cache
 C:\Users\k1300378\Dropbox\Public\Koulu\Windows-ohjelmointi\Harjoitusty-4\ProductService\obj\Debug\ProductService.dll
 C:\Users\k1300378\Dropbox\Public\Koulu\Windows-ohjelmointi\Harjoitusty-4\ProductService\obj\Debug\ProductService.pdb
+C:\Users\k1300378\Dropbox\Public\Koulu\Windows-ohjelmointi\Harjoitusprojekti\ProductService\obj\Debug\ProductService.csprojResolveAssemblyReference.cache
+C:\Users\k1300378\Dropbox\Public\Koulu\Windows-ohjelmointi\Harjoitusprojekti\ProductService\obj\Debug\ProductService.dll
+C:\Users\k1300378\Dropbox\Public\Koulu\Windows-ohjelmointi\Harjoitusprojekti\ProductService\obj\Debug\ProductService.pdb

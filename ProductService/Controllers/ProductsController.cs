@@ -1,4 +1,5 @@
 ﻿using ProductService.Models;
+using System;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
@@ -6,10 +7,64 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.OData;
+using System.Web.OData.Routing;
 namespace ProductService.Controllers
 {
     public class ProductsController : ODataController
     {
+        public async Task<IHttpActionResult> DeleteRef([FromODataUri] int key,
+        string navigationProperty, [FromBody] Uri link)
+        {
+            var product = db.Products.SingleOrDefault(p => p.Id == key);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            switch (navigationProperty)
+            {
+                case "Supplier":
+                    product.Supplier = null;
+                    break;
+
+                default:
+                    return StatusCode(HttpStatusCode.NotImplemented);
+            }
+            await db.SaveChangesAsync();
+
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        [AcceptVerbs("POST", "PUT")]
+        public async Task<IHttpActionResult> CreateRef([FromODataUri] int key,
+            string navigationProperty, [FromBody] Uri link)
+        {
+            var product = await db.Products.SingleOrDefaultAsync(p => p.Id == key);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            switch (navigationProperty)
+            {
+                case "Supplier":
+                    // Note: The code for GetKeyFromUri is shown later in this topic.
+                    var relatedKey = Helpers.GetKeyFromUri<int>(Request, link);
+                    var supplier = await db.Suppliers.SingleOrDefaultAsync(f => f.Id == relatedKey);
+                    if (supplier == null)
+                    {
+                        return NotFound();
+                    }
+
+                    product.Supplier = supplier;
+                    break;
+
+                default:
+                    return StatusCode(HttpStatusCode.NotImplemented);
+            }
+            await db.SaveChangesAsync();
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
         ProductsContext db = new ProductsContext();
         private bool ProductExists(int key)
         {
@@ -19,6 +74,14 @@ namespace ProductService.Controllers
         {
             db.Dispose();
             base.Dispose(disposing);
+        }
+
+        // GET /Products(1)/Supplier
+        [EnableQuery]
+        public SingleResult<Supplier> GetSupplier([FromODataUri] int key)
+        {
+            var result = db.Products.Where(m => m.Id == key).Select(m => m.Supplier);
+            return SingleResult.Create(result);
         }
 
         [EnableQuery]
@@ -113,5 +176,56 @@ namespace ProductService.Controllers
             await db.SaveChangesAsync();
             return StatusCode(HttpStatusCode.NoContent);
         }
+
+        [HttpPost]
+        public async Task<IHttpActionResult> Rate([FromODataUri] int key, ODataActionParameters parameters)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            int rating = (int)parameters["Rating"];
+            db.Ratings.Add(new ProductRating
+            {
+                ProductID = key,
+                Rating = rating
+            });
+
+            try
+            {
+                await db.SaveChangesAsync();
+            }
+            catch (DbUpdateException e)
+            {
+                if (!ProductExists(key))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        [HttpGet]
+        public IHttpActionResult MostExpensive()
+        {
+            var product = db.Products.Max(x => x.Price);
+            return Ok(product);
+        }
+
+        [HttpGet]
+        [ODataRoute("GetSalesTaxRate(PostalCode={postalCode})")]
+        public IHttpActionResult GetSalesTaxRate([FromODataUri] int postalCode)
+        {
+            double rate = 5.6;  // Use a fake number for the sample.
+            return Ok(rate);
+        }
+
+
     }
 }

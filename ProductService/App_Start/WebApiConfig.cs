@@ -26,10 +26,28 @@ namespace ProductService
             // New code:
             ODataModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<Product>("Products");
+            // New code:
+            builder.Namespace = "ProductService";
+            builder.EntityType<Product>()
+                .Action("Rate")
+                .Parameter<int>("Rating");
+            // New code:
+            builder.EntitySet<Supplier>("Suppliers");
+            config.MapODataServiceRoute("ODataRoute", null, builder.GetEdmModel());
+
             config.MapODataServiceRoute(
                 routeName: "ODataRoute",
                 routePrefix: null,
                 model: builder.GetEdmModel());
+            // New code:
+            builder.Namespace = "ProductService";
+            builder.EntityType<Product>().Collection
+                .Function("MostExpensive")
+                .Returns<double>();
+            // New code:
+            builder.Function("GetSalesTaxRate")
+                .Returns<double>()
+                .Parameter<int>("PostalCode");
         }
     }
 }

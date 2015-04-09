@@ -13,5 +13,11 @@ namespace ProductService.Models
         {
         }
         public DbSet<Product> Products { get; set; }
+
+        // New code:
+        public DbSet<Supplier> Suppliers { get; set; }
+
+        // New code:
+        public DbSet<ProductRating> Ratings { get; set; }
     }
 }
